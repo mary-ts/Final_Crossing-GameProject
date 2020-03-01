@@ -1,0 +1,140 @@
+----------------------------------------------------------------------------------------
+--
+-- main.lua
+--
+-----------------------------------------------------------------------------------------
+
+-- -- Background music obviously
+-- local backgroundMusic = audio.loadStream( "mario.mp3" )
+-- audio.reserveChannels( 1 )
+-- audio.setVolume( 0.5, { channel=1 } )
+-- audio.play( backgroundMusic, { channel=1, loops=-1 } )
+--
+local physics = require( "physics" )
+physics.start()
+physics.setGravity(0, 12)
+
+-------------------------- VARIABLES -------------------------------------------
+local lives = 3
+local dead = false
+
+local livesText = lives
+
+--------------------------------------------------------------------------------
+-- Create background
+local background = display.newImageRect("background.png", 1280, 800)
+background.x = display.contentCenterX
+background.y = display.contentCenterY
+
+
+livesText = display.newText( "Lives: " .. lives, display.contentCenterX, 20, native.systemFont, 40 )
+livesText:setFillColor( 1, 1, 1 )
+
+
+-- Create ground object
+local cw, ch = display.actualContentWidth, display.actualContentHeight
+local ground = display.newRect( display.contentCenterX, ch-64, cw, 64 )
+ground:setFillColor( 0.4, 0.4, 0.8 )
+ground.objType = "ground"
+physics.addBody( ground, "static", { bounce=0.0, friction=0.3 } )
+
+ground.collisionType = "ground"
+
+-- -- Create spikes
+local spikes = display.newImageRect("spikes.png", 300, 30)
+spikes.x = display.contentCenterX-400
+spikes.y = ground.y-46
+physics.addBody( spikes, "static", {density=1, bounce=0.0, friction=0.3 } )
+
+spikes.myName = "spikes"
+
+-- Create character
+local character = display.newImageRect("character.png", 300, 300)
+character.myName = "main"
+character.x = display.contentCenterX
+character.y = ground.y0
+
+
+physics.addBody( character, "dynamic", { density=1.0, bounce=0 })
+-- Stop character falling
+character.isFixedRotation = true
+
+--Double jump method
+local characterJumping = 0
+local function jump(event)
+  if ( direction == "left" and event.keyName == "space" and characterJumping < 3) then
+        character:applyLinearImpulse( -700, -700, character.x, character.y )
+        characterJumping = characterJumping+1
+      elseif ( direction == "right" and event.keyName == "space" and characterJumping<3) then
+          character:applyLinearImpulse(700, -700, character.x, character.y )
+          characterJumping = characterJumping+1
+        elseif ( event.keyName == "space" and characterJumping<3) then
+            character:applyLinearImpulse( 0, -700, character.x, character.y )
+            characterJumping = characterJumping+1
+    end
+
+--Resets jump to 0
+    local function onCollision( self, event )
+          if ( event.phase == "began" ) then
+            characterJumping = 0
+            character:setLinearVelocity( 0, 0 )
+          end
+        end
+
+    character.collision = onCollision
+    character:addEventListener( "collision" )
+end
+
+Runtime:addEventListener( "key", jump )
+
+--Direction
+local function ButtonTrack(event)
+  if (direction == "right") then
+	    character.x = character.x + 10
+      main = "Portrait_-_talk.png"
+
+	elseif ( direction == "left" ) then
+	    character.x = character.x - 10
+
+  elseif ( direction == "down" ) then
+     character.y = character.y + 10
+    end
+  end
+Runtime:addEventListener( "enterFrame", ButtonTrack )
+
+--Continuous move
+local function move(event)
+if( event.phase == "up" ) then
+  direction = nil
+elseif( event.phase == "down" ) then
+  direction = event.keyName
+end
+end
+Runtime:addEventListener( "key", move)
+
+--Collision with spikesStatic
+local function spikeCollision( event )
+    if( event.phase == "began" ) then
+
+      local obj1 = "main"
+      local obj2 = event.other
+
+        if( obj1.myName == "main" and obj2.myName == "spikes") then
+            if( dead == false ) then
+              dead = true
+
+        display.remove( "main" )
+
+              --Update lives
+              lives = lives - 1
+              livesText.text = "Lives: " .. lives
+      else
+          character.alpha = 0
+          timer.performWithDelay( 1000, restoreChar)
+            end
+        end
+    end
+end
+Runtime:addEventListener( "collision", spikeCollision )
+--------------------------------------------------------------------------------
+
