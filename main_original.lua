@@ -155,38 +155,39 @@ local function restoreChar()
     character.x = display.contentCenterX
     character.y = ground.y - 150
 
-    -- Fade in the character
-    transition.to( character, { alpha=1, time=4000,
-        onComplete = function()
-            character.isBodyActive = true
+-- Fade in the character
+    transition.to( character, { alpha=1, time=1000, onComplete = function()
+        character.isBodyActive = true
             died = false
         end
     } )
 end
 
 
-------------------- NOT WORKING ----------------------
 --Collision with spikesStatic
-local function spikesCollision( self, event )
+local function spikesCollision( event )
     if( event.phase == "began" ) then
 
-      local obj1 = event.target
-      local obj2 = event.other
+      local obj1 = event.object1
+      local obj2 = event.object2
 
-        if( obj1.myName == "character" and obj2.myName == "static spikes" ) then
+        if( ( obj1.myName == "character" and obj2.myName == "static spikes" ) or ( obj1.myName == "static spikes" and obj2.myName == "character" ) )then
             if( died == false ) then
               died = true
-              --Update lives
-              livesCount = livesCount - 1
-              livesText.text = "Lives: " .. livesCount
-
-            else
-              character.alpha = 0
-              timer.performWithDelay( 1000, restoreChar )
+                if( livesCount > 0 )then
+                  --display.remove( character )
+                  --Update lives
+                  livesCount = livesCount - 1
+                  livesText.text = "Lives: " .. livesCount
+                  character.alpha = 0
+                  timer.performWithDelay( 1000, restoreChar )
+                else
+                  character.alpha = 0
+                  timer.performWithDelay( 1000, restoreChar )
+                end
             end
         end
     end
 end
 
-    character.collision = spikesCollision
-    character:addEventListener( "collision" )
+    Runtime:addEventListener( "collision", spikesCollision )
