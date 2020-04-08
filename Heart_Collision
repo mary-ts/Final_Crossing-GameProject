@@ -1,0 +1,38 @@
+-- may need to make a heart variable, i have one added up top in the list just- mary ----               
+               
+               -- Create heart                
+heartStatic = display.newImageRect("heart.png", 30, 30)
+heartStatic.x = display.contentCenterX+230
+heartStatic.y = ground.y-60
+
+physics.addBody( heartStatic, "static" ) --{ bounce=0.0, friction=0.0 } )
+heartStatic.myName = "life heart"
+
+
+----- heart collision----
+    local function heartCollision( event )
+        if( event.phase == "began" ) then
+
+          local obj1 = event.object1
+          local obj2 = event.object2
+
+            if( obj1.myName == "character" and obj2.myName == "life heart" )  then                 
+
+                      livesCount = livesCount + 1
+                      livesText.text = "Lives: " .. livesCount
+                      event.object2:removeSelf()
+                      event.object2 = nil
+
+            elseif ( obj1.myName == "life heart" and obj2.myName == "character" )  then
+
+                       livesCount = livesCount + 1
+                       livesText.text = "Lives: " .. livesCount           
+                       event.object1:removeSelf()
+                       event.object1 = nil
+
+                    end
+                end
+            end
+      
+
+ Runtime:addEventListener( "collision", heartCollision )
