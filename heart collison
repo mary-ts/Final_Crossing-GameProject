@@ -26,7 +26,7 @@ heartStatic.myName = "life heart"
             elseif ( obj1.myName == "life heart" and obj2.myName == "character" )  then
 
                        livesCount = livesCount + 1
-                       livesText.text = "Lives: " .. livesCount           
+                       livesText.text = " : " .. livesCount           
                        event.object1:removeSelf()
                        event.object1 = nil
 
