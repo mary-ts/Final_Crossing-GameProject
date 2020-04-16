@@ -1,0 +1,45 @@
+local featherCount = 0
+
+---feather counter---
+featherCountt = display.newImageRect("feather.png",70,70)
+featherCountt.x = display.contentCenterX-625
+featherCountt.y = display.contentCenterY-300
+
+featherText = display.newText( " : " .. featherCount, 120, 80, native.systemFont, 40 )
+featherText:setFillColor( 1, 1, 1 )
+
+
+--feather---
+  feather = display.newImageRect("feather.png",70,70)
+  feather.x = display.contentCenterX+100
+  feather.y = display.contentCenterY+200
+
+  physics.addBody( feather, "static" )
+  feather.myName = "feather"
+
+  ----- feather collision----
+      local function featherCollision( event )
+          if( event.phase == "began" ) then
+
+            local obj1 = event.object1
+            local obj2 = event.object2
+
+              if( obj1.myName == "character" and obj2.myName == "feather" )
+                   then
+
+                        featherCount = featherCount + 1
+                        featherText.text = " : " .. featherCount
+                        event.object2:removeSelf()
+
+              elseif ( obj1.myName == "feather" and obj2.myName == "character" )
+                   then
+
+                       featherCount = featherCount + 1
+                       featherText.text = " : " .. featherCount
+                       event.object1:removeSelf()
+
+                      end
+                  end
+              end
+
+Runtime:addEventListener( "collision", featherCollision )
