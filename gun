@@ -1,0 +1,66 @@
+local gun = false
+
+---GUN - actual shoot function -----
+local function fireGun(event)
+
+if gun==true then
+   if( event.keyName == "g" ) then
+     local gunLaser = display.newImageRect("gunlaser.png", 60, 20 ) --this is laser size
+     physics.addBody( gunLaser, "dynamic", {isSensor=true} )
+     gunLaser.myName = "gunlaser"
+
+     gunLaser.x = character.x
+     gunLaser.y = character.y
+
+     transition.to( gunLaser, { x=2000, time=700,  -- x is lasers destination, time is how fast it goes
+     onComplete = function() display.remove( gunLaser ) end
+     } )
+    end
+  end
+end
+  Runtime:addEventListener( "key", fireGun )
+
+---create gun----
+  gunPickup = display.newImageRect("gun.png", 150, 45)
+  gunPickup.x = display.contentCenterX+500
+  gunPickup.y = ground.y-80
+
+  physics.addBody( gunPickup, "static" )
+  gunPickup.myName = "gun"
+
+---gun pickup---
+  local function gunCollision( event )
+      if( event.phase == "began" ) then
+
+    local obj1 = event.object1
+    local obj2 = event.object2
+
+          if( obj1.myName == "character" and obj2.myName == "gun" )
+               then
+                    gun=true
+                    event.object2:removeSelf()
+          elseif ( obj1.myName == "gun" and obj2.myName == "character" )
+               then
+                   gun=true
+                   event.object1:removeSelf()
+                  end
+              end
+          end
+Runtime:addEventListener( "collision", gunCollision )
+
+----gun laser Collision----
+  local function gunlaserCollision( event )
+      if( event.phase == "began" ) then
+
+        local obj1 = event.object1
+        local obj2 = event.object2
+
+          if ( obj1.myName == "goose" and obj2.myName == "gunlaser") then
+                  event.object1:removeSelf()
+
+            elseif( obj1.myName == "gunlaser" and obj2.myName == "goose" ) then
+                   event.object2:removeSelf()
+             end
+          end
+       end
+Runtime:addEventListener( "collision", gunlaserCollision )
